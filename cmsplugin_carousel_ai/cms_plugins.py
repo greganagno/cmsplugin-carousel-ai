@@ -17,7 +17,9 @@ class CarouselPlugin(CMSPluginBase):
     module = _("Carousel")
     name = _("Image Carousel")
     inlines = (CarouselSlideAdmin,)
-    render_template = "cmsplugin_carousel_ai/carousel.html"
+    
+    def get_render_template(self, context, instance, placeholder):
+        return 'cmsplugin_carousel_ai/{}'.format(instance.template)
 
     def render(self, context, instance, placeholder):
         context["carousel"] = instance

@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
 from cms.models import CMSPlugin, force_text, Page
 from django.db import models
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from filer.fields.image import FilerImageField
+
+def get_templates():
+    choices = [
+        ('carousel.html', _('Default')),
+    ]
+    choices += getattr(
+        settings,
+        'CAROUSEL_LINK_TEMPLATES',
+        [],
+    )
+    return choices
 
 
 class Carousel(CMSPlugin):
@@ -12,6 +24,12 @@ class Carousel(CMSPlugin):
     name = models.CharField(
         verbose_name=_("name"),
         max_length=160,
+    )
+    template = models.CharField(
+        verbose_name=_('Template'),
+        choices=get_templates(),
+        default=get_templates()[0][0],
+        max_length=255,
     )
     interval = models.FloatField(
         verbose_name=_("slide changing time in seconds"),
@@ -52,11 +70,21 @@ class Slide(models.Model):
     image = FilerImageField(
         verbose_name=_("slide image"),
     )
-    caption = models.CharField(
-        verbose_name=_("slide caption"),
+    header = models.CharField(
+        verbose_name=_("slide header"),
         max_length=160,
         blank=True,
     )
+    subheader = models.CharField(
+        verbose_name=_("slide subheader"),
+        max_length=160,
+        blank=True,
+    )
+    content = models.CharField(
+        verbose_name=_("slide content"),
+        max_length=160,
+        blank=True,
+    ) 
     url = models.URLField(
         verbose_name=_("link to URL"),
         max_length=250,
@@ -86,7 +114,7 @@ class Slide(models.Model):
         ordering = ("ordering",)
 
     def __str__(self):
-        return force_text(self.caption or self.image.label)
+        return force_text(self.header or self.image.label)
 
     @property
     def link(self):
